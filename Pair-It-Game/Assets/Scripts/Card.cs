@@ -11,7 +11,7 @@ namespace PairIt
         Closed = 0,
         Open = 1
     }
-    public delegate void CardStateCallback(int cardId, CardState state);
+    public delegate void CardStateCallback(Card card);
 
     public class Card : MonoBehaviour
     {
@@ -22,13 +22,22 @@ namespace PairIt
 
         [SerializeField] private int m_CardId;
 
-        CardStateCallback OnCardFlipped;
+        public CardStateCallback OnCardFlipped;
+
+        private bool m_IsMatched = false;
+
+        private float m_LastFlipTime;
+        public int CardId { get { return m_CardId; } }
+        public CardState CardState { get { return m_CardState; } }
+        public bool IsMatched { get { return m_IsMatched; } }
+        public float LastFlipTime { get { return m_LastFlipTime; } }
 
         private void Awake()
         {
             m_CardImage.gameObject.SetActive(false);
             m_CardBackImage.gameObject.SetActive(true);
             m_CardState = CardState.Closed;
+            m_LastFlipTime = 0;
         }
         // Start is called before the first frame update
         void Start()
@@ -44,7 +53,6 @@ namespace PairIt
         void OnDestroy()
         {
             m_CardButton.onClick.RemoveListener(OnCardButtonClick);
-
         }
         // Update is called once per frame
         void Update()
@@ -56,12 +64,18 @@ namespace PairIt
             if (m_CardState == CardState.Closed)
             {
                 m_CardState = CardState.Open;
+                m_LastFlipTime = Time.time;
+                m_CardButton.enabled = false;
+
                 FlipCard(m_CardState);
 
-                OnCardFlipped?.Invoke(m_CardId, m_CardState);
+                OnCardFlipped?.Invoke(this);
             }
         }
-
+        public void SetCardId(int cardId)
+        {
+            m_CardId = cardId;
+        }
         public void FlipCard(CardState state)
         {
             m_CardBackImage.gameObject.SetActive(state == CardState.Closed);
@@ -72,7 +86,11 @@ namespace PairIt
         {
             return m_CardState == CardState.Open;
         }
-
+        public void SetMatched()
+        {
+            m_IsMatched = true;
+            m_LastFlipTime = 0;
+        }
         public IEnumerator RevealCard()
         {
             if (m_CardState == CardState.Closed)
@@ -95,6 +113,9 @@ namespace PairIt
             if (m_CardState == CardState.Open)
             {
                 m_CardState = CardState.Closed;
+                m_LastFlipTime = 0;
+                m_CardButton.enabled = true;
+
                 FlipCard(m_CardState);
             }
         }
