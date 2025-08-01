@@ -1,16 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace PairIt
 {
 
-    public enum CardState
-    {
-        Closed = 0,
-        Open = 1
-    }
     public delegate void CardStateCallback(Card card);
 
     public class Card : MonoBehaviour
@@ -67,7 +63,7 @@ namespace PairIt
                 m_LastFlipTime = Time.time;
                 m_CardButton.enabled = false;
 
-                FlipCard(m_CardState);
+                StartCoroutine(FlipCard(m_CardState));
 
                 OnCardFlipped?.Invoke(this);
             }
@@ -76,10 +72,25 @@ namespace PairIt
         {
             m_CardId = cardId;
         }
-        public void FlipCard(CardState state)
+        public IEnumerator FlipCard(CardState state)
         {
-            m_CardBackImage.gameObject.SetActive(state == CardState.Closed);
-            m_CardImage.gameObject.SetActive(state == CardState.Open);
+            RectTransform cardTransForm = this.GetComponent<RectTransform>();
+            Quaternion initialRotation = cardTransForm.rotation;
+
+
+            Sequence rotateSequence = DOTween.Sequence();
+
+            rotateSequence.Append(cardTransForm.DORotate(new Vector3(0, 90, 0), 0.4f, RotateMode.FastBeyond360).SetEase(Ease.OutCubic));
+            rotateSequence.Append(DOVirtual.DelayedCall(0.1f, () =>
+            {
+                m_CardBackImage.gameObject.SetActive(state == CardState.Closed);
+                m_CardImage.gameObject.SetActive(state == CardState.Open);
+            }));
+            rotateSequence.Append(cardTransForm.DORotate(initialRotation.eulerAngles, 0.1f, RotateMode.FastBeyond360).SetEase(Ease.InCubic));
+
+            rotateSequence.Play();
+
+            yield return new WaitForSeconds(1.0f);
         }
 
         public bool IsSelected()
@@ -96,14 +107,14 @@ namespace PairIt
             if (m_CardState == CardState.Closed)
             {
                 m_CardState = CardState.Open;
-                FlipCard(m_CardState);
+                yield return FlipCard(m_CardState);
             }
-            yield return new WaitForSeconds(2);
+            yield return new WaitForSeconds(Constants.kCardRevealTime);
 
             if (m_CardState == CardState.Open)
             {
                 m_CardState = CardState.Closed;
-                FlipCard(m_CardState);
+                yield return FlipCard(m_CardState);
             }
 
             yield return null;
@@ -116,7 +127,7 @@ namespace PairIt
                 m_LastFlipTime = 0;
                 m_CardButton.enabled = true;
 
-                FlipCard(m_CardState);
+                StartCoroutine(FlipCard(m_CardState));
             }
         }
     }
