@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -40,6 +41,26 @@ namespace PairIt
              CreateCell(6);*/
         }
 
+        public void SetRowCountForGrid(int rowCount)
+        {
+            m_GridUI.constraint = GridLayoutGroup.Constraint.FixedRowCount;
+            m_GridUI.constraintCount = rowCount;
+            RectTransform gridTrans = m_GridUI.GetComponent<RectTransform>();
+            float gridHeight = gridTrans.rect.height;
+            float gridWidth = gridTrans.rect.width;
+            Debug.Log("" + gridWidth + " " + gridHeight);
+
+
+            float calculatedCellHeight = Mathf.FloorToInt((gridHeight - (m_GridUI.spacing.y * (rowCount + 1))) / rowCount);
+
+            float cellPreferredHeight = m_CellPrefab.GetComponent<LayoutElement>().preferredHeight;
+            float cellPreferredWidth = m_CellPrefab.GetComponent<LayoutElement>().preferredWidth;
+            float calculatedCellWidth = Mathf.FloorToInt((cellPreferredWidth / cellPreferredHeight) * calculatedCellHeight);
+
+            Debug.Log("" + calculatedCellWidth + " " + calculatedCellHeight);
+
+            m_GridUI.cellSize = new Vector2(calculatedCellWidth, calculatedCellHeight);
+        }
         public void CreateCellsForCardPairs(List<int> cardIdPairs)
         {
             if (cardIdPairs != null)

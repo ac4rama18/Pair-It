@@ -27,9 +27,11 @@ namespace PairIt
 		void Start()
 		{
 			m_MatchedPairCount = 0;
-			m_GeneratedPairCount = 4;
+			m_GeneratedPairCount = 12;
+			m_BoardController.SetRowCountForGrid(3);
 			GeneratePairs(m_GeneratedPairCount);
 		}
+
 		public void Update()
 		{
 
@@ -83,7 +85,7 @@ namespace PairIt
 		{
 			yield return new WaitForSeconds(2);
 			m_BoardController.ShowGameOver();
-}
+		}
 
 	}
 }
