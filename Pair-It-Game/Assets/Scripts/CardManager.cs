@@ -4,6 +4,15 @@ using UnityEngine;
 
 namespace PairIt
 {
+	[System.Serializable]
+	public class GameData
+	{
+		public int m_MaxCardPairs;
+		public int m_Rows;
+
+		public List<int> m_GeneratedCards;
+	}
+
 
 	public class CardManager : MonoBehaviour
 	{
@@ -27,9 +36,37 @@ namespace PairIt
 		void Start()
 		{
 			m_MatchedPairCount = 0;
-			m_GeneratedPairCount = 12;
-			m_BoardController.SetRowCountForGrid(3);
-			GeneratePairs(m_GeneratedPairCount);
+
+
+			if (PlayerPrefs.HasKey("game_data"))
+			{
+				string gameDataString = PlayerPrefs.GetString("game_data");
+				GameData gameData = JsonUtility.FromJson<GameData>(gameDataString);
+
+				m_GeneratedPairCount = gameData.m_MaxCardPairs;
+
+				m_BoardController.SetRowCountForGrid(gameData.m_Rows);
+				m_BoardController.CreateCellsForCardPairs(gameData.m_GeneratedCards);
+			}
+			else
+			{
+				GameData gameData = new GameData();
+
+				gameData.m_MaxCardPairs = 6; // should be between 1 to 12 since we have only 12 unique cards
+				gameData.m_Rows = 2; // can be in between 2 to 5
+
+
+				m_BoardController.SetRowCountForGrid(gameData.m_Rows);
+
+				m_GeneratedPairCount = gameData.m_MaxCardPairs;
+
+				gameData.m_GeneratedCards = GeneratePairs(gameData.m_MaxCardPairs);
+				m_BoardController.CreateCellsForCardPairs(gameData.m_GeneratedCards);
+
+				string gameDataString = JsonUtility.ToJson(gameData);
+				PlayerPrefs.SetString("game_data", gameDataString);
+			}
+
 		}
 
 		public void Update()
@@ -37,8 +74,15 @@ namespace PairIt
 
 		}
 
-		public void GeneratePairs(int value)
+		public List<int> GeneratePairs(int value)
 		{
+			List<int> cardPairsForPlay = new List<int>();
+			if (value <= 0 || value > Constants.kMaxCards)
+			{
+				Debug.LogWarning("Out of cards...");
+				return cardPairsForPlay;
+			}
+
 			if (value > 1)
 			{
 				List<int> cardIds = new List<int>();
@@ -48,7 +92,6 @@ namespace PairIt
 				}
 
 				List<int> selectedCardIds = new List<int>();
-				List<int> cardPairsForPlay = new List<int>();
 				while (selectedCardIds.Count < value)
 				{
 					int rendIndex = UnityEngine.Random.Range(0, cardIds.Count);
@@ -62,11 +105,8 @@ namespace PairIt
 					}
 				}
 				cardPairsForPlay.Shuffle();
-				cardPairsForPlay.Shuffle();
-				cardPairsForPlay.Shuffle();
-
-				m_BoardController.CreateCellsForCardPairs(cardPairsForPlay);
 			}
+			return cardPairsForPlay;
 		}
 
 		public void OnCardMatch(int cardId)
@@ -77,6 +117,9 @@ namespace PairIt
 			if (m_GeneratedPairCount == m_MatchedPairCount)
 			{
 				Debug.Log("Match Complete!");
+
+				PlayerPrefs.DeleteKey("game_data");
+
 				StartCoroutine(ShowGameOver());
 			}
 		}
@@ -84,6 +127,7 @@ namespace PairIt
 		private IEnumerator ShowGameOver()
 		{
 			yield return new WaitForSeconds(2);
+			AudioSFXPlayer.Instance.PlayGameOver();
 			m_BoardController.ShowGameOver();
 		}
 
