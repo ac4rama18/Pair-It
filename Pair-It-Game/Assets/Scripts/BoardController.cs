@@ -9,10 +9,13 @@ namespace PairIt
     {
         [SerializeField] private GridLayoutGroup m_GridUI;
         [SerializeField] private GameObject m_CellPrefab;
+        [SerializeField] private GameObject m_GameOverPanel;
 
 
         private List<Card> m_SelectedCards;
         private List<Tuple<Card, Card>> m_MatchedCards;
+
+
         void Awake()
         {
             int cnt = m_GridUI.transform.childCount;
@@ -22,19 +25,31 @@ namespace PairIt
             }
             m_SelectedCards = new List<Card>();
             m_MatchedCards = new List<Tuple<Card, Card>>();
+
+            m_GameOverPanel.SetActive(false);
         }
 
         // Start is called before the first frame update
         void Start()
         {
-            CreateCell(0);
-            CreateCell(6);
-            CreateCell(4);
-            CreateCell(4);
-            CreateCell(0);
-            CreateCell(6);
+            /* CreateCell(0);
+             CreateCell(6);
+             CreateCell(4);
+             CreateCell(4);
+             CreateCell(0);
+             CreateCell(6);*/
         }
 
+        public void CreateCellsForCardPairs(List<int> cardIdPairs)
+        {
+            if (cardIdPairs != null)
+            {
+                for (int i = 0; i < cardIdPairs.Count; i++)
+                {
+                    CreateCell(cardIdPairs[i]);
+                }
+            }
+        }
         // Update is called once per frame
         void Update()
         {
@@ -70,7 +85,6 @@ namespace PairIt
                     AudioSFXPlayer.Instance.PlayCardPairMatch();
                 }
             }
-
         }
 
         private void CreateCell(int id)
@@ -112,6 +126,11 @@ namespace PairIt
             {
                 m_SelectedCards.Add(card);
             }
+        }
+
+        public void ShowGameOver()
+        {
+            m_GameOverPanel.SetActive(true);
         }
     }
 }

@@ -10,6 +10,6 @@ namespace PairIt
 	{
 		public const int kCardRevealTime = 2;
 		public const int kCardInitialRevealTime = 1;
-
+		public const int kMaxCards = 11;
 	}
 }
