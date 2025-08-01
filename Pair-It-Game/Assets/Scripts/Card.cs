@@ -90,7 +90,7 @@ namespace PairIt
 
             rotateSequence.Play();
 
-            yield return new WaitForSeconds(1.0f);
+            yield return new WaitForSeconds(0.6f);
         }
 
         public bool IsSelected()
@@ -109,7 +109,7 @@ namespace PairIt
                 m_CardState = CardState.Open;
                 yield return FlipCard(m_CardState);
             }
-            yield return new WaitForSeconds(Constants.kCardRevealTime);
+            yield return new WaitForSeconds(Constants.kCardInitialRevealTime);
 
             if (m_CardState == CardState.Open)
             {

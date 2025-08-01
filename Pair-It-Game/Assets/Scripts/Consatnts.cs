@@ -9,6 +9,7 @@ namespace PairIt
 	public class Constants
 	{
 		public const int kCardRevealTime = 2;
+		public const int kCardInitialRevealTime = 1;
 
 	}
 }

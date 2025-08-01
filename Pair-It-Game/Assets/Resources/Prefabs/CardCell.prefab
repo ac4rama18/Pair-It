@@ -210,6 +210,7 @@ GameObject:
   - component: {fileID: 8890907639441344613}
   - component: {fileID: 8890907639441344612}
   - component: {fileID: 8890907639441344615}
+  - component: {fileID: 6262340214647414499}
   m_Layer: 0
   m_Name: CardCell
   m_TagString: Untagged
@@ -314,3 +315,15 @@ MonoBehaviour:
   m_CardImage: {fileID: 8890907637939917009}
   m_CardBackImage: {fileID: 8890907638936738989}
   m_CardId: 0
+--- !u!225 &6262340214647414499
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8890907639441344610}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0

@@ -74,9 +74,11 @@ namespace PairIt
             {
                 if (m_SelectedCards[i].CardId == card.CardId)
                 {
-                    m_SelectedCards[i].SetMatched();
                     matchedCard = m_SelectedCards[i];
+
+                    matchedCard.SetMatched();
                     card.SetMatched();
+
                     break;
                 }
             }
