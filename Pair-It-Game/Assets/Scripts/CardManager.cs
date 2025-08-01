@@ -30,5 +30,11 @@ namespace PairIt
 
 			}
 		}
+
+		public void OnCardMatch(int cardId)
+		{
+
+			ScoreManager.Instance.AddScore(10);
+		}
 	}
 }

@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
@@ -21,11 +20,13 @@ namespace PairIt
         public CardStateCallback OnCardFlipped;
 
         private bool m_IsMatched = false;
+        private bool m_IsFlipping = false;
 
         private float m_LastFlipTime;
         public int CardId { get { return m_CardId; } }
         public CardState CardState { get { return m_CardState; } }
         public bool IsMatched { get { return m_IsMatched; } }
+        public bool IsFlipping { get { return m_IsFlipping; } }
         public float LastFlipTime { get { return m_LastFlipTime; } }
 
         private void Awake()
@@ -74,9 +75,10 @@ namespace PairIt
         }
         public IEnumerator FlipCard(CardState state)
         {
+            m_IsFlipping = true;
+
             RectTransform cardTransForm = this.GetComponent<RectTransform>();
             Quaternion initialRotation = cardTransForm.rotation;
-
 
             Sequence rotateSequence = DOTween.Sequence();
 
@@ -91,6 +93,8 @@ namespace PairIt
             rotateSequence.Play();
 
             yield return new WaitForSeconds(0.6f);
+
+            m_IsFlipping = false;
         }
 
         public bool IsSelected()
@@ -101,6 +105,11 @@ namespace PairIt
         {
             m_IsMatched = true;
             m_LastFlipTime = 0;
+        }
+
+        public void HighlightCard()
+        {
+            transform.DOPunchScale(new Vector3(0.1f, 0.1f, 0), 0.2f);
         }
         public IEnumerator RevealCard()
         {

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,6 +12,7 @@ namespace PairIt
 
 
         private List<Card> m_SelectedCards;
+        private List<Tuple<Card, Card>> m_MatchedCards;
         void Awake()
         {
             int cnt = m_GridUI.transform.childCount;
@@ -19,6 +21,7 @@ namespace PairIt
                 GameObject.Destroy(m_GridUI.transform.GetChild(i).gameObject);
             }
             m_SelectedCards = new List<Card>();
+            m_MatchedCards = new List<Tuple<Card, Card>>();
         }
 
         // Start is called before the first frame update
@@ -45,6 +48,8 @@ namespace PairIt
                     if (currentTime >= selectedCard.LastFlipTime + Constants.kCardRevealTime)
                     {
                         selectedCard.CloseCard();
+                        AudioSFXPlayer.Instance.PlayMisMatch();
+
                         closedCards.Add(selectedCard);
                     }
                 }
@@ -53,6 +58,19 @@ namespace PairIt
             {
                 m_SelectedCards.Remove(closedCards[i]);
             }
+
+            for (int i = 0; i < m_MatchedCards.Count; i++)
+            {
+                var item = m_MatchedCards[i];
+                if (!item.Item1.IsFlipping && !item.Item2.IsFlipping)
+                {
+                    item.Item1.HighlightCard();
+                    item.Item2.HighlightCard();
+                    m_MatchedCards.Remove(item);
+                    AudioSFXPlayer.Instance.PlayCardPairMatch();
+                }
+            }
+
         }
 
         private void CreateCell(int id)
@@ -67,7 +85,8 @@ namespace PairIt
 
         private void OnCardFlipped(Card card)
         {
-            Debug.Log($"Card {card.CardId} flipped to {card.CardState}");
+            // Debug.Log($"Card {card.CardId} flipped to {card.CardState}");
+            AudioSFXPlayer.Instance.PlayCardFlip();
 
             Card matchedCard = null;
             for (int i = 0; i < m_SelectedCards.Count; i++)
@@ -79,6 +98,9 @@ namespace PairIt
                     matchedCard.SetMatched();
                     card.SetMatched();
 
+                    m_MatchedCards.Add(new Tuple<Card, Card>(card, matchedCard));
+
+                    CardManager.Instance.OnCardMatch(matchedCard.CardId);
                     break;
                 }
             }
